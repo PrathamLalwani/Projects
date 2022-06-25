@@ -1,23 +1,24 @@
-const http = require("http");
+const express = require('express');
 
-const server = http.createServer((req, res) => {
-  const url = req.url;
-  if (url === "/") {
-    res.setHeader("Content-Type", "text/html");
-    res.write("<html>");
-    res.write("<head><title>Enter Message</title></head>");
-    res.write(
-      '<body><form action = "/message" method ="POST"><input type="text"><button type="submit"/>Submit</button></form></body>'
-    );
-    res.write("</html>");
-    res.end();
-  }
-  res.setHeader("Content-Type", "text/html");
-  res.write("<html>");
-  res.write("<head><title>My second page</title></head>");
-  res.write("<body><h1>Welcome to the page</h1></body>");
-  res.write("</html>");
-  res.end();
+const app = express();
+const path = require('path');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+//setup for view engine
+app.set('view engine', 'pug');
+app.set('views', 'views');
+//setup for reading and parsing JSON
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+//access to public files
+app.use(express.static(path.join(__dirname, 'public')));
+//admin route
+app.use('/admin', adminRoutes);
+//shop route
+app.use(shopRoutes);
+
+app.use((req, res, next) => {
+  res.status(404).sendFile(path.join(__dirname, 'views', '404notfound.html'));
 });
-
-server.listen(3000);
+app.listen(3000);
